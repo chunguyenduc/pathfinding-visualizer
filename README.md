@@ -1,2 +1,2 @@
 # pathfinding-visualizer
-simple Pathfinding Visualizer made by Python Tkinter
+Simple Pathfinding Visualizer made by Python Tkinter
