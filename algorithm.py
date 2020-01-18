@@ -1,10 +1,8 @@
 import queue
-import time
 import math
-import copy
 
+#Mỗi ô trên board coi như là 1 node
 class Node():
-
 
 	def __init__(self, parent = None, position = None):
 		self.parent = parent
@@ -29,7 +27,7 @@ def create_child_node(maze, node):
 
 	children = []
 	
-	for new_position in [(0, -1), (0, 1), (-1, 0), (1, 0), (1, -1), (-1, 1), (-1, -1), (1, 1)]:
+	for new_position in [(1, -1), (-1, 1), (-1, -1), (1, 1), (0, -1), (0, 1), (-1, 0), (1, 0),]:
 
 		# Get child node position
 		node_position = (node.position[0] + new_position[0], node.position[1] + new_position[1])
@@ -56,11 +54,12 @@ def create_child_node(maze, node):
 				if node.position[1] + 1 <= (len(maze[len(maze)-1]) -1) and node.position[0] + 1 <= (len(maze) - 1) and maze[node.position[0]][node.position[1] + 1] == 1 and maze[node.position[0] + 1][node.position[1]] == 1:
 					continue
 								
-
+			#Khúc trên sẽ cải tiến sau chứ nhìn ghê quá
+			
 			# Create new node
 			new_node = Node(node, node_position)
 			
-			# Tính khoảng cách f, g, h
+			# Tính khoảng cách g
 			#if new_position in [(0, -1), (0, 1), (-1, 0), (1, 0)]:
 			if new_position in [(0, -1), (0, 1), (-1, 0), (1, 0)]:
 				new_node.g = node.g + 1
@@ -68,10 +67,7 @@ def create_child_node(maze, node):
 				new_node.g = node.g + math.sqrt(2)
 			
 			
-			#new_node.h = ((new_node.position[0] - node.position[0]) ** 2) + ((new_node.position[1] - node.position[1]) ** 2)	#Euclide
-			#new_node.f = new_node.g + new_node.h
-
-			# Append
+			
 			children.append(new_node)
 		
 	return children
@@ -86,13 +82,8 @@ def get_path(node):
 	return path[::-1] # Return reversed path	
 	
 	
-'''	
-Hàm tính đường đi bằng thuật toán A*
-Input: 
-	- maze: Ma trận thể hiện bản đồ
-	- start, end: Vị trí bắt đầu, kết thúc (tọa độ x, y)	
-'''
-def astar(maze, start, end):
+
+def astar(maze, start, end, hType='Mahattan'):
 
 	# Create start and end node
 	start_node = Node(None, start)
@@ -103,8 +94,7 @@ def astar(maze, start, end):
 	# Initialize open and closed list
 	open_list = []
 	closed_list = set()
-	traversal = []
-	close_traversal = []
+	traversal = []	#List thể hiện thứ tự duyệt, dùng cho visualizer
 
 
 	# Add the start node
@@ -115,19 +105,16 @@ def astar(maze, start, end):
 
 		# Get the current node
 		current_node = open_list[0]
-		
-		
 		index_min = 0
-		# Find node with smallest f
+		
+		# By finding node with smallest f
 		for i in range(len(open_list)):
 			if open_list[i].f < current_node.f:
 				current_node = open_list[i]
 				index_min = i
 
 		# Pop current off open list, add to closed list
-		
 		open_list.pop(index_min)
-		#traversal.append(current_node.position)
 		closed_list.add(current_node)
 		
 
@@ -147,44 +134,45 @@ def astar(maze, start, end):
 			#Check if child is in the closed list
 			if child in closed_list:
 					continue
-
-			#child.h = math.sqrt((child.position[0] - end_node.position[0]) ** 2 + (child.position[1] - end_node.position[1]) ** 2)
+			
+			#Calculate h
+			if hType == 'Mahattan':
+				child.h = abs(child.position[0] - end_node.position[0]) + abs(child.position[1] - end_node.position[1])
+			else:
+				child.h = math.sqrt((child.position[0] - end_node.position[0]) ** 2 + (child.position[1] - end_node.position[1]) ** 2)
 			
 			
-			child.h = abs(child.position[0] - end_node.position[0]) + abs(child.position[1] - end_node.position[1])
-			
+			#Calculate f
 			child.f = child.g + child.h
 			
 			
-			# Child is already in the open list
+			#If child is already in the open list, replace it with smaller g node
 			appear = False
 			for open_node in open_list:
 				if child == open_node:
 					appear = True
 					if child.g < open_node.g:
-						#child = copy.deepcopy(open_node)
-						
 						open_node.g = child.g
 						open_node.h = child.h
 						open_node.f = child.f
 						open_node.position = child.position
 						open_node.parent = child.parent
-						
+						#NOTE: Khúc này không hiểu sao gán thẳng không được mà phải gán như vầy mới được
 						
 					break
-
+			#Else
 			if appear == False:		
 				# Add the child to the open list
 				open_list.append(child)
+				
 				if child.position != start_node.position and child.position != end_node.position:		
 					traversal.append(child.position)
 			
 			
 	#Open list empty but exit loop mean no path
-	return traversal, close_traversal, -1
+	return traversal, -1
 
 def bfs(maze, start, end):
-	visited = set()
 	
 	# Create start and end node
 	start_node = Node(None, start)
@@ -192,19 +180,21 @@ def bfs(maze, start, end):
 	end_node = Node(None, end)
 	end_node.g = 0
 	
+	#Queue for open node
 	queue = []
 	queue.append(start_node)
 	
+	#Visited set
+	visited = set()
 	visited.add(start_node)
 	
 	traversal = []
 	
 	while len(queue) > 0:
 	
+		#Pop node off queue
 		current_node = queue[0]
-		queue.pop(0)
-		
-		
+		queue.pop(0)	#Queue is FIFO, so pop first node
 
 		
 		#If end
@@ -220,10 +210,7 @@ def bfs(maze, start, end):
 			#Check if child is visited
 			if child not in visited:
 			
-				
-				
 				visited.add(child)
-				
 				queue.append(child)
 				
 				if child.position != start_node.position and child.position != end_node.position:		
@@ -234,7 +221,7 @@ def bfs(maze, start, end):
 	return traversal, -1
 
 
-
+#Dijkstra
 def ucs(maze, start, end):
 	
 	start_node = Node(None, start)
@@ -248,36 +235,26 @@ def ucs(maze, start, end):
 
 	# Add the start node
 	q.append(start_node)
-	
 	traversal = []
 	
 	# Loop until the end
 	while len(q) > 0:
-		current_node = q[0]
-		
 		#Find smallest g node
+		current_node = q[0]
 		min_index = 0
 		for i in range(len(q)):
 			if q[i].g < current_node.g:
 				current_node = q[i]
-				
-				
 				min_index = i
 			
 		visited.add(current_node)
 		q.pop(min_index)
 		
 		
-
-		#if (current_node.g, current_node.position) not in visited:
-		#	visited.add((current_node.g, current_node.position))
-		
 		# Found the goal
 		if current_node == end_node:
 			
 			return traversal, get_path(current_node)
-			
-		
 
 		#Create children node
 		children = create_child_node(maze, current_node)
@@ -285,14 +262,10 @@ def ucs(maze, start, end):
 		# Loop through children
 		for child in children:
 			
-			
 			if child in visited:
 				continue
 		
-			
-			
-			
-			# Child is already in the open list
+			#If child is already in the open list, replace with smaller g node
 			appear = False
 			for node in q:
 				if child == node:
@@ -302,15 +275,14 @@ def ucs(maze, start, end):
 						node.parent = child.parent
 						node.position = child.position
 					break
+			#Else append		
 			if appear == False:
 				q.append(child)
 				if child.position != start_node.position and child.position != end_node.position:		
 					traversal.append(child.position)
 
-		
-		#time.sleep(0.5)	
-	#Open list empty but exit loop mean no path
 	
+	#Open list empty but exit loop mean no path
 	return traversal, -1
 	
 def dfs(maze, start, end):
@@ -320,23 +292,25 @@ def dfs(maze, start, end):
 	start_node = Node(None, start)
 	end_node = Node(None, end)
 	
+	#Stack for open node
 	stack = []
 	stack.append(start_node)
-	
 	
 	traversal = []
 	
 	while len(stack) > 0:
-		#current_node = q[0]
-		#q.pop(0)
+		
 		# Get the current node
 		current_node = stack[-1]
 
 		# Pop current off open list
-		stack.pop(-1)
+		stack.pop(-1)	#Stack is LIFP, so pop the last one
 		
+		#Chỗ này nhìn thì có vẻ không cần nhưng xóa đi thì lỗi
 		if current_node not in visited:
 			visited.add(current_node)
+		
+		
 		#If end
 		if current_node.position == end:
 			return traversal, get_path(current_node)
@@ -347,10 +321,9 @@ def dfs(maze, start, end):
 		
 		for child in children:
 		
-			
-		
 			if child not in visited:		
-				stack.append(child)	
+				stack.append(child)
+				
 				if child.position != start_node.position and child.position != end_node.position:		
 					traversal.append(child.position)				
 	
