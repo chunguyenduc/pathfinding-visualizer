@@ -26,14 +26,14 @@ def isGoal(a, row, col):
 
 '''
 Chương  trình có 3 class chính
-	- MainBoard 1: board chính, dùng để vẽ tường, xóa tường, ...
-	- Process: dùng để xử lý tìm đường đi, vẽ đường đi, xáo đường đi
-	- OptionBoard: có các button chạy, xóa, chọn thuật toán, 
+	- Board: Dùng để vẽ tường, xóa tường, ...
+	- ProcessBoard: kế thừa Board, có thêm các chức năng tìm đường đi, vẽ đường đi, xóa đường đi
+	- OptionBoard: có các button chạy, xóa, chọn thuật toán, liên kết với ProcessBoard
 '''
 
 	
 #Board chính
-class MainBoard(tk.Frame): #Kế thừa frame của tkinter
+class Board(tk.Frame): #Kế thừa frame của tkinter
 	def __init__(self, root, h = HEIGHT, w=WIDTH):
 		
 		super().__init__(root, width=h, height=w)
@@ -68,7 +68,7 @@ class MainBoard(tk.Frame): #Kế thừa frame của tkinter
 		
 	def drawBoard(self):
 	
-		self.pack()
+		self.pack(side='left')
 		self.canvas.pack()
 		#Vẽ các đường ngang dọc để tạo thành bàn cờ
 		
@@ -255,14 +255,15 @@ class MainBoard(tk.Frame): #Kế thừa frame của tkinter
 			self.hide(row, col)
 	
 	
-class Process(MainBoard):
+	
+#================================================================================================================================	
+	
+class ProcessBoard(Board):
 	def __init__(self, root):
 		
 		
 		
 		super().__init__(root)
-		
-		
 		
 		#Thứ tự duyệt đường đi
 		self.traversal = []
@@ -274,6 +275,10 @@ class Process(MainBoard):
 		#Thuật toán sử dụng, default là A*
 		self.algo = "A* Search"
 		
+		self.button = None
+	
+		self.doTraverse = None
+		self.doPath = None
 	
 	#Hàm xử lý khi click Run
 	def findPath(self):
@@ -307,11 +312,18 @@ class Process(MainBoard):
 		
 		else:
 			self.traversal = traversal
+			
 			self.path = path
+			
+			
+			
 			
 			#Vẽ đường đi
 			self.drawSearch()
-
+			#self.drawCloseTraversal()
+			
+			
+		
 		
 	#Hàm xóa tất cả khi click Clear All		
 	def clearAll(self):
@@ -339,44 +351,56 @@ class Process(MainBoard):
 				self.hide(self.traversal[0][0], self.traversal[0][1])
 			self.traversal.pop(0)
 			
+		
+			
 	#NOTE: Hàm trên quá dài đi
+
+
+	def linkto(self, optionBoard):
+		self.button = optionBoard.runButton
 
 	#Hàm vẽ đường đi
 	def drawSearch(self, i=0, j=1):
 		#Trong quá trình vẽ thì không được thao tác 
-		'''
-		self.runButton.config(state = "disable")	#Liệt nút Run
-		self.clearButton.config(state = "disable")	#Liệt nút Clear All
-		'''
 		
-		
-		self.disableUI()							#Liệt thao tác Board chính
+		self.button.config(state = "disable")	#Liệt nút Run
+		self.disableUI()						#Liệt thao tác Board chính
 	
 		#Khúc này khó quá quên rồi
+		
 		if i >= len(self.traversal)-1:
+			#self.canvas.after_cancel(self.doTraverse)
 			if j >= len(self.path)-1:
+			
 				#Khúc này là kết thúc vẽ
-				'''
-				self.runButton.config(state = "active")		#Làm nút Run bấm được
-				self.clearButton.config(state = "active")	#Làm nút ClearAll bấm được
-				'''
-				self.setUI()								#Làm Board chính thao tác được
+				self.button.config(state = "active") 	#Làm nút Run bấm được
+				self.setUI()							#Làm Board chính thao tác được
+				#self.canvas.after_cancel(self.doPath)
 				return
 			else:
 				self.highlight(self.path[j][0], self.path[j][1], 'yellow')
-				self.canvas.after(25, lambda: self.drawSearch(i, j+1))
+				#self.doPath = 
+				self.canvas.after(0, lambda: self.drawSearch(i, j+1))
 			#return
 		else:
-			self.highlight(self.traversal[i][0], self.traversal[i][1], 'deepskyblue')
+			self.highlight(self.traversal[i][0], self.traversal[i][1], 'midnightblue')
+			#self.doTraverse = 
 			self.canvas.after(5, lambda: self.drawSearch(i+1))
-			
 		
+		
+	
+		
+	
+
+	
+		
+						
 			
 	
 	
 #Board process
 class OptionBoard(tk.Frame):
-	def __init__(self, root, h, w, process):
+	def __init__(self, root, h=HEIGHT, w=WIDTH//3):
 		'''
 		#Main Board
 		self.board = board
@@ -387,18 +411,21 @@ class OptionBoard(tk.Frame):
 		self.pack(side='left', fill='both')
 		
 		
-		self.process = process
+		self.process = None
 		
 		
 		#Button Run
-		self.runButton = tk.Button(self, text='Run', width = 10, command = self.process.findPath)
+		self.runButton = None
+		
 	
-		#Button Clear
-		self.clearButton = tk.Button(self, text='Clear All', width = 10, command = self.process.clearAll) 
+		#Button Clear All
+		self.clearButton = None
+		
 		
 		
 		#Button Clear Path
-		self.clearPathButton = tk.Button(self, text='Clear Path', width = 10, command=self.process.clearPath) 
+		self.clearPathButton = None
+		
 		
 		#Combobox chọn thuật toán
 		self.algoBox = ttk.Combobox(self, 
@@ -413,9 +440,9 @@ class OptionBoard(tk.Frame):
 		
 		
 		
-	
+	#
 	def drawOptionBoard(self):
-		self.pack()
+		self.pack(side='left')
 		self.runButton.pack()
 		self.clearButton.pack()
 		self.clearPathButton.pack()
@@ -427,41 +454,42 @@ class OptionBoard(tk.Frame):
 			self.process.algo = self.algoBox.get()
 	
 	
-
+	def linkto(self, processBoard):
+		self.process = processBoard
+		self.runButton = tk.Button(self, text='Run', width = 10, command = self.process.findPath)
+		self.clearButton = tk.Button(self, text='Clear All', width = 10, command = self.process.clearAll)
+		self.clearPathButton = tk.Button(self, text='Clear Path', width = 10, command=self.process.clearPath) 
+		
+		
 
 def main():
 
 
 	root = tk.Tk()
 	root.title("Pathfinding Visualizer")
-	'''
-	
-	frame = tk.Frame(root, width=WIDTH+20, height=HEIGHT)
-	frame.pack()
-	'''
-	'''
-	frame = tk.Frame(root, width=WIDTH, height=HEIGHT)
-	frame.pack(side='left')
-	'''
-	'''
-	main_board = MainBoard(root)
-	main_board.drawBoard()
-	main_board.setUI()
-	'''
 	
 	
-	process = Process(root)
-	process.drawBoard()
-	process.setUI()
+	
+	process_board = ProcessBoard(root)
+	process_board.drawBoard()
+	process_board.setUI()
 	
 	
-	option_board = OptionBoard(root, 600, 200, process)
+	option_board = OptionBoard(root)
+	
+	
+	option_board.linkto(process_board)
 	option_board.drawOptionBoard()
 	
 	
-	root.mainloop()
 	
-main()
+	process_board.linkto(option_board)
+	
+	
+	root.mainloop()
+
+if __name__ == "__main__":
+	main()
 	
 
 

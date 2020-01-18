@@ -1,6 +1,7 @@
 import queue
 import time
 import math
+import copy
 
 class Node():
 
@@ -39,22 +40,22 @@ def create_child_node(maze, node):
 			# Make sure walkable
 			if maze[node_position[0]][node_position[1]] == 1:
 				continue
-			'''
+			
 			# Xét trường hợp tạo ô chéo thì không được vượt qua corner
 			if new_position	== (1, -1):
-				if maze[node.position[0]][node.position[1] - 1] == 1 and maze[node.position[0] + 1][node.position[1]] == 1:
+				if node.position[1] >= 1 and node.position[0] < (len(maze) - 1) and maze[node.position[0]][node.position[1] - 1] == 1 and maze[node.position[0] + 1][node.position[1]] == 1:
 					continue
 			elif new_position == (-1, 1):
-				if maze[node.position[0]][node.position[1] + 1] == 1 and maze[node.position[0] - 1][node.position[1]] == 1:
+				if node.position[1] < (len(maze[len(maze)-1]) -1) and node.position[0] >= 1 and maze[node.position[0]][node.position[1] + 1] == 1 and maze[node.position[0] - 1][node.position[1]] == 1:
 					continue
 			elif new_position == (-1, -1):
-				if maze[node.position[0]][node.position[1] - 1] == 1 and maze[node.position[0] - 1][node.position[1]] == 1:
+				if node.position[1] >= 1 and node.position[0] >= 1 and maze[node.position[0]][node.position[1] - 1] == 1 and maze[node.position[0] - 1][node.position[1]] == 1:
 					continue
 					
 			else:
-				if maze[node.position[0]][node.position[1] + 1] == 1 and maze[node.position[0] + 1][node.position[1]] == 1:
+				if node.position[1] + 1 <= (len(maze[len(maze)-1]) -1) and node.position[0] + 1 <= (len(maze) - 1) and maze[node.position[0]][node.position[1] + 1] == 1 and maze[node.position[0] + 1][node.position[1]] == 1:
 					continue
-			'''					
+								
 
 			# Create new node
 			new_node = Node(node, node_position)
@@ -64,7 +65,7 @@ def create_child_node(maze, node):
 			if new_position in [(0, -1), (0, 1), (-1, 0), (1, 0)]:
 				new_node.g = node.g + 1
 			else:
-				new_node.g = node.g + 1.414
+				new_node.g = node.g + math.sqrt(2)
 			
 			
 			#new_node.h = ((new_node.position[0] - node.position[0]) ** 2) + ((new_node.position[1] - node.position[1]) ** 2)	#Euclide
@@ -103,6 +104,7 @@ def astar(maze, start, end):
 	open_list = []
 	closed_list = set()
 	traversal = []
+	close_traversal = []
 
 
 	# Add the start node
@@ -127,6 +129,7 @@ def astar(maze, start, end):
 		open_list.pop(index_min)
 		#traversal.append(current_node.position)
 		closed_list.add(current_node)
+		
 
 		# Found the goal
 		if current_node == end_node:
@@ -145,11 +148,11 @@ def astar(maze, start, end):
 			if child in closed_list:
 					continue
 
-			child.h = math.sqrt((child.position[0] - end_node.position[0]) ** 2 + (child.position[1] - end_node.position[1]) ** 2)
+			#child.h = math.sqrt((child.position[0] - end_node.position[0]) ** 2 + (child.position[1] - end_node.position[1]) ** 2)
 			
-			'''
+			
 			child.h = abs(child.position[0] - end_node.position[0]) + abs(child.position[1] - end_node.position[1])
-			'''
+			
 			child.f = child.g + child.h
 			
 			
@@ -159,10 +162,14 @@ def astar(maze, start, end):
 				if child == open_node:
 					appear = True
 					if child.g < open_node.g:
+						#child = copy.deepcopy(open_node)
+						
 						open_node.g = child.g
 						open_node.h = child.h
 						open_node.f = child.f
+						open_node.position = child.position
 						open_node.parent = child.parent
+						
 						
 					break
 
@@ -174,7 +181,7 @@ def astar(maze, start, end):
 			
 			
 	#Open list empty but exit loop mean no path
-	return traversal, -1
+	return traversal, close_traversal, -1
 
 def bfs(maze, start, end):
 	visited = set()
@@ -212,9 +219,13 @@ def bfs(maze, start, end):
 
 			#Check if child is visited
 			if child not in visited:
-				child.g = current_node.g + 1
+			
+				
+				
 				visited.add(child)
+				
 				queue.append(child)
+				
 				if child.position != start_node.position and child.position != end_node.position:		
 					traversal.append(child.position)
 		
@@ -275,12 +286,10 @@ def ucs(maze, start, end):
 		for child in children:
 			
 			
-			
-			node = Node()
 			if child in visited:
 				continue
 		
-			child.g = current_node.g + 1
+			
 			
 			
 			# Child is already in the open list
