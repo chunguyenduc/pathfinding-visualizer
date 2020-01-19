@@ -4,13 +4,13 @@ import time
 from algorithm import *
 
 #Kích thước cứng cho chương trình
-#Sửa cũng được nhưng mà phải đúng tỷ lệ
+
 
 HEIGHT = 600
 WIDTH = 600
-SIDE = 20 # Kích thước của 1 ô
+SIDE = 24 # Kích thước của 1 ô
 
-#Vậy theo kích thước này thì chương trình có 30x30 ô
+
 
 #Kiểm tra tại vị trí đó có phải wall
 def isWall(a, row, col):
@@ -24,6 +24,19 @@ def isStart(a, row, col):
 def isGoal(a, row, col):
 	return a[row][col] == 2
 
+#Đặt lại tọa độ trong phạm vi cho phép
+def setInRange(a, row, col):
+	if row < 0:
+		row = 0
+	if row >= len(a):
+		row = len(a)-1
+	if col < 0:
+		col = 0
+	if col >= len(a[0]):
+		col = len(a[0])-1
+		
+	return row, col
+
 '''
 Chương  trình có 3 class chính
 	- Board: Dùng để vẽ tường, xóa tường, ...
@@ -32,7 +45,7 @@ Chương  trình có 3 class chính
 '''
 
 	
-#Board chính
+#Board
 class Board(tk.Frame): #Kế thừa frame của tkinter
 	def __init__(self, root, h = HEIGHT, w=WIDTH):
 		
@@ -53,11 +66,10 @@ class Board(tk.Frame): #Kế thừa frame của tkinter
 		self.startNode = Node(None, (heightMatrix//2, 0))
 		self.endNode = Node(None, (heightMatrix//2, widthMatrix-1))
 		
-		#Set ma trận cho start, end
+		#Set vị trí cho start, end
 		startRow, startCol = self.startNode.position
 		endRow, endCol = self.endNode.position
-		
-		
+	
 		self.a[startRow][startCol] = -2 #Điểm bắt đầu có giá trị -2
 		self.a[endRow][endCol] = 2 #Điểm kết thúc có giá trị 2
 		
@@ -70,19 +82,21 @@ class Board(tk.Frame): #Kế thừa frame của tkinter
 	
 		self.pack(side='left')
 		self.canvas.pack()
-		#Vẽ các đường ngang dọc để tạo thành bàn cờ
+		
+		#Vẽ các đường ngang dọc để tạo thành board
 		
 		#Vẽ đường ngang
 		x1 = 0
 		x2 = WIDTH
-		for k in range(0, HEIGHT, SIDE):
+		for k in range(0, HEIGHT+1, SIDE):
 			y1 = k
 			y2 = k
 			self.canvas.create_line(x1, y1, x2, y2)
+			
 		#Vẽ đường dọc
 		y1 = 0
 		y2 = HEIGHT
-		for k in range(0, WIDTH, SIDE):
+		for k in range(0, WIDTH+1, SIDE):
 			x1 = k
 			x2 = k
 			self.canvas.create_line(x1, y1, x2, y2)
@@ -163,12 +177,14 @@ class Board(tk.Frame): #Kế thừa frame của tkinter
 				
 	#Hàm thực hiện vẽ tường, xóa tường, ... khi người dùng thao tác
 	def callbackClick(self, event):
-	
-
+		
 		self.canvas.focus_set()
 		
 		#Lấy giá trị dòng và cột được click
 		row, col = int((event.y) / SIDE), int((event.x) / SIDE)
+		
+		row, col = setInRange(self.a, row, col)
+			
 		
 		
 		#Nếu click vào điểm bắt đầu hoặc kết thúc thì hold sẽ là kéo điểm
@@ -203,6 +219,7 @@ class Board(tk.Frame): #Kế thừa frame của tkinter
 		
 		#Điểm mới
 		row, col = int((event.y) / SIDE), int((event.x) / SIDE)
+		row, col = setInRange(self.a, row, col)
 		
 		#Nếu đủ điều kiện thì thực hiện kéo điểm bằng cách tô điểm mới và xóa điểm cũ
 		if not isWall(self.a, row, col) and (oldRow, oldCol) != (row, col) and not isGoal(self.a, row, col):
@@ -221,6 +238,8 @@ class Board(tk.Frame): #Kế thừa frame của tkinter
 		#Điểm mới
 		row, col = int((event.y) / SIDE), int((event.x) / SIDE)
 		
+		row, col = setInRange(self.a, row, col)
+			
 		#Nếu đủ điều kiện thì thực hiện kéo điểm bằng cách tô điểm mới và xóa điểm cũ
 		if not isWall(self.a, row, col) and (oldRow, oldCol) != (row, col) and not isStart(self.a, row, col):
 			self.highlight(row, col, 'orange')
@@ -236,7 +255,8 @@ class Board(tk.Frame): #Kế thừa frame của tkinter
 		
 		#Lấy giá trị dòng và cột được click
 		row, col = int((event.y) / SIDE), int((event.x) / SIDE)
-		
+		row, col = setInRange(self.a, row, col)
+			
 		#Nếu đủ điều kiện thì tô màu ô đó
 		if not isWall(self.a, row, col) and not isStart(self.a, row, col) and not isGoal(self.a, row, col):
 			self.highlight(row, col, 'darkslategray')
@@ -250,10 +270,12 @@ class Board(tk.Frame): #Kế thừa frame của tkinter
 		#Lấy giá trị dòng và cột được click
 		row, col = int((event.y) / SIDE), int((event.x) / SIDE)
 		
+		row, col = setInRange(self.a, row, col)
+		
 		#Nếu điểm là wall, xóa ô đó
 		if isWall(self.a, row, col):
 			self.hide(row, col)
-	
+		
 	
 	
 #================================================================================================================================	
@@ -265,6 +287,7 @@ class ProcessBoard(Board):
 		
 		super().__init__(root)
 		
+		
 		#Thứ tự duyệt đường đi
 		self.traversal = []
 		
@@ -273,12 +296,10 @@ class ProcessBoard(Board):
 		self.path = []
 		
 		#Thuật toán sử dụng, default là A*
-		self.algo = "A* Search"
+		self.algo = "A* Search (Mahattan)"
 		
-		self.button = None
-	
-		self.doTraverse = None
-		self.doPath = None
+		#Trong quá trình run thì không được click Run
+		self.button = None	#Liên kết với button Run bên Option Board
 	
 	#Hàm xử lý khi click Run
 	def findPath(self):
@@ -289,11 +310,14 @@ class ProcessBoard(Board):
 		#Biến tạm
 		traversal, path = 0, 0
 		
-		
 		#Choosing algorithm
-		if self.algo == "A* Search":
+		if self.algo == "A* Search (Mahattan)":
 		
 			traversal, path = astar(self.a, self.startNode.position, self.endNode.position)
+		
+		elif self.algo == "A* Search (Euclide)":
+		
+			traversal, path = astar(self.a, self.startNode.position, self.endNode.position, "Euclide")
 		
 		elif self.algo == "Dijkstra Search":
 			traversal, path = ucs(self.a, self.startNode.position, self.endNode.position)
@@ -312,17 +336,11 @@ class ProcessBoard(Board):
 		
 		else:
 			self.traversal = traversal
-			
 			self.path = path
-			
-			
 			
 			
 			#Vẽ đường đi
 			self.drawSearch()
-			#self.drawCloseTraversal()
-			
-			
 		
 		
 	#Hàm xóa tất cả khi click Clear All		
@@ -330,6 +348,7 @@ class ProcessBoard(Board):
 
 		#Xóa wall
 		#Xóa phần tử đầu cho đến khi rỗng
+		
 		while self.wallList != []:
 			self.hide(self.wallList[0][0], self.wallList[0][1])
 			
@@ -339,23 +358,23 @@ class ProcessBoard(Board):
 	#Xóa đường đi	
 	def clearPath(self):
 	
-		#Xóa phần tử đầu cho đến khi rỗng	
-		while self.path != []:
-			
-			if self.path[0] != self.startNode.position and self.path[0] != self.endNode.position and not isWall(self.a, self.path[0][0], self.path[0][1]):
-				self.hide(self.path[0][0], self.path[0][1])
-			self.path.pop(0)
+		#Xóa màu tất cả các ô đường đi
+		for x in self.path:
+			if x != self.startNode.position and x != self.endNode.position and not isWall(self.a, x[0], x[1]):
+				self.hide(x[0], x[1])
+		self.path = []		#Đặt lại rỗng
 		
-		while self.traversal != []:
-			if self.traversal[0] != self.startNode.position and self.traversal[0] != self.endNode.position and not isWall(self.a, self.traversal[0][0], self.traversal[0][1]):
-				self.hide(self.traversal[0][0], self.traversal[0][1])
-			self.traversal.pop(0)
+		#Xóa màu tất cả các ô duyệt
+		for x in self.traversal:
+			if x != self.startNode.position and x != self.endNode.position and not isWall(self.a, x[0], x[1]):
+				self.hide(x[0], x[1])
+		self.traversal = []	#Đặt lại rỗng
 			
-		
 			
 	#NOTE: Hàm trên quá dài đi
 
 
+	#Liên kết với button Run bên Option Board
 	def linkto(self, optionBoard):
 		self.button = optionBoard.runButton
 
@@ -364,51 +383,36 @@ class ProcessBoard(Board):
 		#Trong quá trình vẽ thì không được thao tác 
 		
 		self.button.config(state = "disable")	#Liệt nút Run
-		self.disableUI()						#Liệt thao tác Board chính
+		self.disableUI()						#Liệt thao tác Board
 	
-		#Khúc này khó quá quên rồi
-		
+		#Vẽ đường duyệt, vẽ xong thì vẽ đường đi
 		if i >= len(self.traversal)-1:
-			#self.canvas.after_cancel(self.doTraverse)
 			if j >= len(self.path)-1:
 			
 				#Khúc này là kết thúc vẽ
 				self.button.config(state = "active") 	#Làm nút Run bấm được
-				self.setUI()							#Làm Board chính thao tác được
+				self.setUI()							#Làm Board thao tác được
 				#self.canvas.after_cancel(self.doPath)
 				return
 			else:
-				self.highlight(self.path[j][0], self.path[j][1], 'yellow')
-				#self.doPath = 
+				self.highlight(self.path[j][0], self.path[j][1], 'yellow') 
 				self.canvas.after(0, lambda: self.drawSearch(i, j+1))
-			#return
 		else:
 			self.highlight(self.traversal[i][0], self.traversal[i][1], 'midnightblue')
-			#self.doTraverse = 
 			self.canvas.after(5, lambda: self.drawSearch(i+1))
 		
 		
 	
-		
-	
+#================================================================================================================================
 
-	
-		
-						
-			
-	
-	
-#Board process
+#BoardOption
 class OptionBoard(tk.Frame):
 	def __init__(self, root, h=HEIGHT, w=WIDTH//3):
-		'''
-		#Main Board
-		self.board = board
-		'''
+		
 		
 		#Frame bên cạnh Main Board
 		super().__init__(root, width=h, height=w)
-		self.pack(side='left', fill='both')
+		self.pack(side='left')
 		
 		
 		self.process = None
@@ -430,7 +434,8 @@ class OptionBoard(tk.Frame):
 		#Combobox chọn thuật toán
 		self.algoBox = ttk.Combobox(self, 
                             values=[
-                                    "A* Search", 
+                                    "A* Search (Mahattan)",
+									"A* Search (Euclide)",									
                                     "Dijkstra Search",
                                     "Breadth First Search",
                                     "Depth First Search"])
@@ -443,17 +448,17 @@ class OptionBoard(tk.Frame):
 	#
 	def drawOptionBoard(self):
 		self.pack(side='left')
-		self.runButton.pack()
-		self.clearButton.pack()
-		self.clearPathButton.pack()
-		self.algoBox.pack()
+		self.runButton.pack(fill='x', padx=10)
+		self.clearButton.pack(fill='x', padx=10)
+		self.clearPathButton.pack(fill='x', padx=10)
+		self.algoBox.pack(fill='x', padx=10)
 		
 	
 	#Hàm set thuật toán khi được click chọn thuật toán
 	def chooseAlgo(self, event):
 			self.process.algo = self.algoBox.get()
 	
-	
+	#Liên kết với ProcessBoard để chạy đường đi ứng với thuật toán được chọn
 	def linkto(self, processBoard):
 		self.process = processBoard
 		self.runButton = tk.Button(self, text='Run', width = 10, command = self.process.findPath)
@@ -462,10 +467,15 @@ class OptionBoard(tk.Frame):
 		
 		
 
+
+#================================================================================================================================
+
 def main():
 
 
 	root = tk.Tk()
+	root.geometry('770x603+300+50') 
+	root.resizable(False, False)	#Kích thước cố định cho cửa sổ
 	root.title("Pathfinding Visualizer")
 	
 	
@@ -480,7 +490,6 @@ def main():
 	
 	option_board.linkto(process_board)
 	option_board.drawOptionBoard()
-	
 	
 	
 	process_board.linkto(option_board)
