@@ -412,7 +412,7 @@ class OptionBoard(tk.Frame):
 		
 		#Frame bên cạnh Main Board
 		super().__init__(root, width=h, height=w)
-		self.pack(side='left', fill='both')
+		self.pack(side='left')
 		
 		
 		self.process = None
@@ -448,10 +448,10 @@ class OptionBoard(tk.Frame):
 	#
 	def drawOptionBoard(self):
 		self.pack(side='left')
-		self.runButton.pack()
-		self.clearButton.pack()
-		self.clearPathButton.pack()
-		self.algoBox.pack()
+		self.runButton.pack(fill='x', padx=10)
+		self.clearButton.pack(fill='x', padx=10)
+		self.clearPathButton.pack(fill='x', padx=10)
+		self.algoBox.pack(fill='x', padx=10)
 		
 	
 	#Hàm set thuật toán khi được click chọn thuật toán
@@ -474,6 +474,7 @@ def main():
 
 
 	root = tk.Tk()
+	root.geometry('770x603+300+50') 
 	root.resizable(False, False)	#Kích thước cố định cho cửa sổ
 	root.title("Pathfinding Visualizer")
 	
