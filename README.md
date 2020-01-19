@@ -2,14 +2,15 @@
 Simple Pathfinding Visualizer made from Python Tkinter
 
 # Hướng dẫn sử dụng
-- Kéo ô trắng để tạo wall
-- Kéo ô tường để xóa tường
-- Ô xanh lá là điểm bắt đầu, ô cam là điểm kết thúc. Kéo 2 ô để di chuyển vị trí
+Kéo ô trắng để tạo wall
+Kéo ô tường để xóa tường
+Ô xanh lá là điểm bắt đầu, ô cam là điểm kết thúc. Kéo 2 ô để di chuyển vị trí
 ![](image/drag.gif)
 
-- Chọn thuật toán, click Run để chạy
-- Click Clear Path để xóa đường đi cũ
-- Click Clar All để xóa hết tất cả
+
+Chọn thuật toán, click Run để chạy
+Click Clear Path để xóa đường đi cũ
+Click Clar All để xóa hết tất cả
 (Trong lúc chạy vẫn có thể Clear Path và Clear All được, nhưng Run thì không)
 ![](image/run.gif)
 
