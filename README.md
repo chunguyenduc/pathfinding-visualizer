@@ -21,12 +21,24 @@ Simple Pathfinding Visualizer made from Python Tkinter
 ![alt text](image/Euclide.png)
 
 
+
+
+
+
 - Dijkstra Search: Mở các nút theo hình tròn
 ![alt text](image/Dijkstra.png)
 
 
+
+
+
+
 - Breadth First Search: Mở các nút theo hình vuông
 ![alt text](image/BFS.png)
+
+
+
+
 
 
 - Depth First Search: Mở 1 nút cho tới chết rồi lặp lại
