@@ -17,7 +17,6 @@ Simple Pathfinding Visualizer made from Python Tkinter
 
 # Nhận xét
 - Astar Search: Mở các nút hướng tới điểm kết thúc (Đo bằng Mahattan thì mở vuông hơn)
-
 ![alt text](image/Mahattan.png)	
 ![alt text](image/Euclide.png)
 
