@@ -16,13 +16,19 @@ Simple Pathfinding Visualizer made from Python Tkinter
 ![](image/run.gif)
 
 # Nhận xét
-- Astar Search: Mở các nút hướng tới điểm kết thúc(Đo bằng Mahattan thì mở vuông hơn)
-![alt text](image/Mahattan.png)
-![alt text](image/Euclide.png)
+- Astar Search: Mở các nút hướng tới điểm kết thúc (Đo bằng Mahattan thì mở vuông hơn)
+
+![alt text](image/Mahattan.png)	![alt text](image/Euclide.png)
+
+
 - Dijkstra Search: Mở các nút theo hình tròn
 ![alt text](image/Dijkstra.png)
+
+
 - Breadth First Search: Mở các nút theo hình vuông
 ![alt text](image/BFS.png)
+
+
 - Depth First Search: Mở 1 nút cho tới chết rồi lặp lại
 ![alt text](image/DFS.png)
 
